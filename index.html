@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zens · Phone Licence</title>
+<style>
+  :root{
+    --blue:#007aff; --blue-d:#0062cc; --green:#34c759; --red:#ff3b30; --amber:#ff9f0a;
+    --ink:#1c1c1e; --sec:#8e8e93; --appbg:#f2f2f7; --card:#ffffff; --line:#e5e5ea;
+    --good-bg:#e7f8ec; --good-tx:#1c7a3c; --learn-bg:#fff4e0; --learn-tx:#9a6206;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    font-family:-apple-system,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--ink);
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px 10px;
+    background:
+      radial-gradient(1000px 600px at 12% 10%, #fde7f0, transparent 55%),
+      radial-gradient(1000px 700px at 90% 15%, #e3f0ff, transparent 55%),
+      radial-gradient(900px 700px at 80% 100%, #e9fbef, transparent 55%),
+      linear-gradient(180deg,#fef8f0,#eef3fb);
+    background-color:#eaf1fb;
+  }
+  /* ---- interest stickers in the background ---- */
+  .stickers{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
+  .sticker{position:absolute; width:64px; height:64px; border-radius:16px; background:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:32px;
+    box-shadow:0 8px 20px rgba(40,60,120,.14); border:3px solid #fff; opacity:.92}
+  .sticker.sm{width:52px; height:52px; font-size:26px; border-radius:14px}
+  .sticker.lg{width:76px; height:76px; font-size:40px; border-radius:20px}
+  @media (max-width:720px){ .sticker.hide-m{display:none} }
+  /* ---- iPhone 13 mini ---- */
+  .phone{position:relative; z-index:2; width:min(384px,94vw); height:min(824px,90vh);
+    background:linear-gradient(150deg,#3b4a63,#25324a); border-radius:52px; padding:13px;
+    box-shadow:0 30px 70px rgba(20,30,60,.5), inset 0 0 0 2px rgba(255,255,255,.08);}
+  .phone::before,.phone::after{content:""; position:absolute; width:3px; background:#1b2536; border-radius:3px}
+  .phone::before{height:52px; left:-3px; top:150px; box-shadow:0 78px 0 #1b2536, 0 148px 0 #1b2536}
+  .phone::after{height:78px; right:-3px; top:170px}
+  .screen{position:relative; width:100%; height:100%; background:var(--appbg); border-radius:42px; overflow:hidden;
+    box-shadow:inset 0 0 0 2px #000}
+  .notch{position:absolute; top:0; left:50%; transform:translateX(-50%); width:150px; height:27px;
+    background:#000; border-bottom-left-radius:16px; border-bottom-right-radius:16px; z-index:6}
+  .statusbar{height:46px; display:flex; align-items:flex-end; justify-content:space-between; padding:0 26px 6px;
+    font-size:14px; font-weight:600; color:var(--ink); position:relative; z-index:5}
+  .statusbar .r{display:flex; gap:6px; align-items:center; font-size:13px}
+  .app{position:absolute; top:46px; left:0; right:0; bottom:0; overflow-y:auto; -webkit-overflow-scrolling:touch}
+  .app-inner{padding:8px 18px 30px}
+  /* progress */
+  .prog{height:7px; background:#e2e2e8; border-radius:99px; overflow:hidden; margin:2px 0 14px}
+  .prog>i{display:block; height:100%; width:0; background:var(--blue); border-radius:99px; transition:width .35s}
+  /* content */
+  .kick{font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--blue)}
+  h1{font-size:26px; line-height:1.12; margin:6px 0 8px; letter-spacing:-.02em}
+  h2{font-size:20px; line-height:1.3; margin:6px 0 14px; letter-spacing:-.01em}
+  p{line-height:1.5; color:#3a3a3c; font-size:16px}
+  .muted{color:var(--sec)}
+  .hero{font-size:46px; text-align:center; margin:6px 0}
+  .lvl{font-size:12px; font-weight:700; color:var(--sec); letter-spacing:.04em}
+  .tag{display:inline-flex; gap:6px; align-items:center; font-size:12px; font-weight:700; color:var(--blue-d);
+    background:#e8f1ff; border-radius:99px; padding:5px 11px; margin-bottom:10px}
+  .tag.pos{color:#1c7a3c; background:#e7f8ec}
+  .opt{display:block; width:100%; text-align:left; cursor:pointer; font-family:inherit; font-size:16px; font-weight:500;
+    color:var(--ink); background:var(--card); border:1.5px solid var(--line); padding:14px 15px; border-radius:14px; margin:9px 0; transition:.15s}
+  .opt:hover{border-color:#c7d3e6}
+  .opt:disabled{cursor:default}
+  .opt.correct{border-color:var(--green); background:var(--good-bg)}
+  .opt.wrong{border-color:var(--red); background:#fdeceb}
+  .opt .tick{float:right; font-weight:800}
+  .opt.correct .tick{color:var(--green)} .opt.wrong .tick{color:var(--red)}
+  .fb{margin-top:10px; padding:14px 15px; border-radius:14px; font-size:15px; line-height:1.5; display:none}
+  .fb.show{display:block}
+  .fb.good{background:var(--good-bg); color:var(--good-tx)}
+  .fb.learn{background:var(--learn-bg); color:var(--learn-tx)}
+  .btn{display:block; width:100%; text-align:center; cursor:pointer; border:none; font-family:inherit;
+    font-weight:600; font-size:17px; padding:15px; border-radius:14px; margin-top:12px; color:#fff; background:var(--blue)}
+  .btn:hover{background:var(--blue-d)} .btn:active{transform:translateY(1px)}
+  .btn.ghost{background:#eaf1ff; color:var(--blue-d)}
+  .hide{display:none}
+  .center{text-align:center}
+  .badges{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:16px 0}
+  .badge{width:44px; height:44px; border-radius:12px; background:#fff; border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:23px; box-shadow:0 3px 8px rgba(40,60,120,.08)}
+  .cert{background:linear-gradient(180deg,#ffffff,#f5f9ff); border:2px solid var(--blue); border-radius:18px; padding:22px 18px; text-align:center}
+  .cert .seal{font-size:40px}
+  .cert .name{font-size:28px; font-weight:800; color:var(--blue-d); margin:8px 0; letter-spacing:-.01em}
+  .rule{text-align:left; background:#fff; border:1px solid var(--line); border-left:3px solid var(--blue); border-radius:10px;
+    padding:10px 13px; margin:8px 0; font-size:14px; font-weight:500}
+  .note{background:#fff7e8; border:1px solid #ffe0a6; border-radius:12px; padding:14px; margin:14px 0; text-align:left; font-size:15px; line-height:1.5; color:#7a4e05}
+  .sign{display:flex; gap:14px; margin-top:16px; font-size:11px; color:var(--sec); letter-spacing:.04em}
+  .sign div{flex:1; border-top:1.5px solid var(--line); padding-top:6px}
+  @media print{
+    body{background:#fff; display:block; padding:0}
+    .stickers,.notch,.statusbar,.prog,.noprint{display:none!important}
+    .phone{width:auto; height:auto; background:none; box-shadow:none; padding:0}
+    .phone::before,.phone::after{display:none}
+    .screen{box-shadow:none; border-radius:0; position:static; height:auto; background:#fff}
+    .app{position:static}
+  }
+</style>
+</head>
+<body>
+<div class="stickers" id="stickers"></div>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+    <div class="statusbar">
+      <span id="clock">9:41</span>
+      <span class="r">📶 &nbsp;🔋</span>
+    </div>
+    <div class="app">
+      <div class="app-inner">
+        <div class="prog noprint"><i id="bar"></i></div>
+        <div id="screen"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const KID="Zens";
+
+/* scatter interest stickers */
+const STK=[
+  ["🐴",6,12,"-8","lg"],["🎤",14,80,"10","sm hide-m"],["🧁",78,8,"6","lg"],["🏑",70,86,"-10",""],
+  ["🌊",40,4,"-6","sm"],["📚",86,74,"8",""],["📷",24,90,"-12","lg hide-m"],["🎂",90,20,"-6","sm hide-m"],
+  ["⛺",60,10,"9","sm"],["🟩",30,86,"6","sm hide-m"],["🎾",88,44,"-8","sm hide-m"],["🧵",50,92,"-7","sm hide-m"],
+  ["🕶️",8,44,"7","sm hide-m"],["🏏",18,6,"12","sm"],["🎵",64,90,"-9","sm hide-m"],["🏄",94,60,"6","sm hide-m"]
+];
+const sc=document.getElementById('stickers');
+STK.forEach(([e,top,left,rot,cls])=>{
+  const d=document.createElement('div');
+  d.className='sticker '+cls; d.textContent=e;
+  d.style.top=top+'%'; d.style.left=left+'%'; d.style.transform='rotate('+rot+'deg)';
+  sc.appendChild(d);
+});
+/* live clock */
+function tick(){ const n=new Date(); document.getElementById('clock').textContent=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }
+tick(); setInterval(tick,10000);
+
+const QUESTIONS=[
+  { tag:"Skill", pos:true, emoji:"➕",
+    q:"Otto gives you his number so you can sort hockey lifts. Best way to save it?",
+    options:[
+      {t:"Add him as a new contact called \"Otto\" so you know it's him", correct:true},
+      {t:"Leave it as just a number", correct:false},
+      {t:"Save it under a funny nickname you'll forget", correct:false} ],
+    why:"Saving contacts with real names means you instantly know who's messaging — and it makes unknown numbers stand out as ones to be careful with. Add name, and you can add a photo too." },
+
+  { tag:"Skill", pos:true, emoji:"🗺️",
+    q:"You're cycling to a new hockey pitch you've never been to. Smart way to use Maps?",
+    options:[
+      {t:"Just set off and hope", correct:false},
+      {t:"Pop the address into Maps, check the route, and tell a parent your plan", correct:true},
+      {t:"Follow a random person going the same way", correct:false} ],
+    why:"Maps is brilliant — type in where you're going, glance at the route before you leave, and let a parent know your plan. You can even share your live location with Mummy so she knows you arrived." },
+
+  { tag:"Etiquette", pos:true, emoji:"💬",
+    q:"Sienna sends a long, excited message about the weekend. You reply just \"k\". How might that land?",
+    options:[
+      {t:"Fine — it means yes", correct:false},
+      {t:"It can seem grumpy or cold — a friendly word or 😊 shows you mean it warmly", correct:true},
+      {t:"She'll know you're just busy", correct:false} ],
+    why:"Text can't show your face or voice, so short replies can accidentally seem cross. A little warmth — \"sounds so fun!!\" — keeps friendships happy. Tone is something you choose." },
+
+  { tag:"Etiquette", pos:true, emoji:"⏳",
+    q:"You text Evie and she hasn't replied in an hour. Most likely…",
+    options:[
+      {t:"She's ignoring you — send five more messages", correct:false},
+      {t:"She's just busy — riding, tea, homework. People don't live on their phones", correct:true},
+      {t:"Something's wrong, better ring lots of times", correct:false} ],
+    why:"Nobody owes an instant reply, and that's a good thing. Give people space — it's the same courtesy you'd want. Blowing up someone's phone is the quickest way to annoy a friend." },
+
+  { tag:"Etiquette", pos:true, emoji:"🍽️",
+    q:"You're having tea with Felix and Mummy and your phone buzzes. Polite move?",
+    options:[
+      {t:"Grab it — might be important", correct:false},
+      {t:"Leave it — the people you're with come first; it can wait", correct:true},
+      {t:"Check it under the table so no one sees", correct:false} ],
+    why:"The people in the room come first. Phones away at meals and when someone's talking to you is just good manners — and honestly, grown-ups should do it too." },
+
+  { tag:"Being Kind", pos:true, emoji:"👋",
+    q:"Lia's new and doesn't know many people yet. In the group chat, what's a lovely thing to do?",
+    options:[
+      {t:"Wait for her to talk first", correct:false},
+      {t:"Say hi, include her, invite her to something", correct:true},
+      {t:"Leave her to settle in on her own", correct:false} ],
+    why:"A tiny bit of kindness online goes a long way. Being the one who includes someone is a proper superpower — and exactly the kind of friend you'd want on a first day." },
+
+  { tag:"Staying Safe", emoji:"🏫",
+    q:"First week at Uffculme. Someone in the year above who you don't really know WhatsApps you to meet up after school. Smartest move?",
+    options:[
+      {t:"Go — good to make older mates", correct:false},
+      {t:"Don't arrange anything, and show Mummy or Dad the message", correct:true},
+      {t:"Meet them, but take Sienna", correct:false} ],
+    why:"A bigger school means new people, some you barely know. Don't arrange to meet someone you don't really know, and tell a parent about out-of-the-blue messages. A grown-up in the loop is always the right first step." },
+
+  { tag:"Staying Safe", emoji:"🎭",
+    q:"An unknown number messages: \"Hi Zens it's Mummy, I'm on a new phone — quick, what's the iPad password?\" You…",
+    options:[
+      {t:"Send it — Mummy's locked out", correct:false},
+      {t:"Don't send it; ring Mummy (Sarah) on her real number to check", correct:true},
+      {t:"Send half now, half later", correct:false} ],
+    why:"The \"it's me, I'm on a new phone\" trick is a classic scam to grab passwords. Never send a password to a surprise message — always check by calling the person on their real number." },
+
+  { tag:"Staying Safe", emoji:"🎟️",
+    q:"In a fan chat: \"2 spare Taylor Swift tickets, £40 each — send to my PayPal and they're yours 💖.\" What's really going on?",
+    options:[
+      {t:"Grab them before they're gone!", correct:false},
+      {t:"Almost certainly a scam — don't pay, tell a parent", correct:true},
+      {t:"Offer £30 instead", correct:false} ],
+    why:"\"Cheap tickets, pay me first\" from a stranger online is one of the most common scams there is — Swifties get targeted loads. If you can't trust who's selling, don't send money. Get a parent to help find real ones." },
+
+  { tag:"Photography", emoji:"📷",
+    q:"You've taken a brilliant shot of Oona and Georgie at hockey and want to post it. First thing to do?",
+    options:[
+      {t:"Post it — it's a great photo", correct:false},
+      {t:"Ask Oona and Georgie first, and check with a parent", correct:true},
+      {t:"Only post it if you're in it too", correct:false} ],
+    why:"A big part of being a good photographer is respect. Always ask before sharing a photo of someone else, and check with a parent about where it's going. Consent first, always." },
+
+  { tag:"Privacy", emoji:"🐴",
+    q:"You want to share a lovely photo from the stables. What could accidentally give away private info?",
+    options:[
+      {t:"The ponies", correct:false},
+      {t:"A yard sign, road name, or the location saved in the photo — it shows where you are", correct:true},
+      {t:"The weather", correct:false} ],
+    why:"Photos quietly reveal where you are — a sign, a street, or hidden location data. Be proud of your snaps, just don't broadcast exactly where you'll be and when." },
+
+  { tag:"Group Chats", emoji:"💛",
+    q:"In the Hornets chat, people start making fun of Evie for missing a goal and it's turning nasty. Kindest move?",
+    options:[
+      {t:"Add a funny dig to fit in", correct:false},
+      {t:"Don't join in — message Evie kindly, and tell an adult if it keeps going", correct:true},
+      {t:"Just mute the chat and say nothing", correct:false} ],
+    why:"Piling on is easy and it really hurts. Don't join in. A kind private message to Evie means loads, and tell an adult if it tips into bullying." },
+
+  { tag:"Staying Safe", emoji:"💻",
+    q:"On your Chromebook doing homework, a flashing box shouts \"⚠️ VIRUS DETECTED! Click NOW!\" What is it?",
+    options:[
+      {t:"Click fast to fix it", correct:false},
+      {t:"A fake trick — close the tab, tell a parent if unsure", correct:true},
+      {t:"Type a password to unlock it", correct:false} ],
+    why:"Scary \"virus — click now!\" pop-ups are fake, designed to panic you. Don't click. Close the tab. Real warnings never shout at you like that." },
+
+  { tag:"Passwords", emoji:"🟩",
+    q:"A game that looks like Wordle asks you to \"sign in with your email and password to save your streak.\" Hmm?",
+    options:[
+      {t:"Sign in — can't lose the streak!", correct:false},
+      {t:"Don't give your password to random apps — check with a parent", correct:true},
+      {t:"Use Mummy's password", correct:false} ],
+    why:"Never hand your real password to random apps or sites. If something wants a login, ask a parent first — no streak is worth your account." },
+
+  { tag:"Saying No", emoji:"🙅",
+    q:"A kid at school tries to show you something rude and dares you to look. You…",
+    options:[
+      {t:"Look, so they don't call you a baby", correct:false},
+      {t:"Say \"no thanks\" — you don't have to look, and can tell a parent", correct:true} ],
+    why:"You're allowed to say no, and a real friend respects it. Tell a parent about it afterwards too — no drama, just so they know." },
+
+  { tag:"Bullying", emoji:"🛡️",
+    q:"Someone keeps sending you mean messages. What's the full plan?",
+    options:[
+      {t:"Send meaner ones back", correct:false},
+      {t:"Don't reply · screenshot · block & report · tell Mummy or Dad", correct:true},
+      {t:"Put up with it and hope it stops", correct:false} ],
+    why:"It is NOT your fault. Don't reply. Keep proof, block and report, and tell a grown-up. You never have to handle it on your own." },
+
+  { tag:"The Big One", emoji:"🫶",
+    q:"Something pops up — a video or picture — that makes you feel scared or upset. What do you do?",
+    options:[
+      {t:"Hide it and say nothing so you don't get in trouble", correct:false},
+      {t:"Put the phone down and tell Mummy or Dad — you're not in trouble", correct:true},
+      {t:"Send it to Sienna to ask what it is", correct:false} ],
+    why:"This is the most important one of all. If anything upsets or scares you, it's never your fault and you're NEVER in trouble. Come to us — always. That door is always open." },
+
+  { tag:"Look After It", emoji:"🌊",
+    q:"At Polzeath you want close-ups of the waves with your camera and phone. What keeps them safe?",
+    options:[
+      {t:"Get right in the shallows", correct:false},
+      {t:"Stay well back from water and sand — salt and grit wreck them", correct:true},
+      {t:"Balance the phone on a rock by the sea", correct:false} ],
+    why:"Salt water and sand are a camera's worst enemies. Get the shot from a safe distance — a wrecked lens is a sad end to a beach day." },
+
+  { tag:"Good Habits", emoji:"📚",
+    q:"It's bedtime. Best plan for the phone (and a lovely bonus)?",
+    options:[
+      {t:"Take it to bed for a bit more", correct:false},
+      {t:"Charge it downstairs — and read a chapter of Famous Five", correct:true},
+      {t:"Keep it on silent under your pillow", correct:false} ],
+    why:"Phones downstairs = proper sleep. Swapping the last scroll for a few pages of a book is one of the best swaps going." },
+
+  { tag:"Real Life", pos:true, emoji:"🌟",
+    q:"Last one. What's the best thing about time AWAY from your phone?",
+    options:[
+      {t:"A whole afternoon riding, then baking a Basque cheesecake", correct:false},
+      {t:"Reading Famous Five in one big go", correct:false},
+      {t:"A day at Polzeath with no signal at all", correct:false},
+      {t:"Honestly — all of it. The best memories are made off-screen", correct:true} ],
+    why:"Here's the big secret: life before phones was amazing, and yours still is. The phone's a handy tool — but the magic is the ponies, the baking, the sea, the books, and real time with people. Put it down often. You won't miss a thing, and you'll gain loads." },
+];
+
+let idx=0, firstTry=0, answered=false;
+const screen=document.getElementById('screen');
+const bar=document.getElementById('bar');
+const app=document.querySelector('.app');
+const setBar=p=>bar.style.width=(p*100)+'%';
+const toTop=()=>{ if(app) app.scrollTop=0; };
+
+function intro(){
+  setBar(0);
+  screen.innerHTML=`
+    <div class="center">
+      <div class="hero">📱✨</div>
+      <div class="kick">Your Phone Licence</div>
+      <h1>Hi Zens!</h1>
+      <p>A phone is brilliant — a map in your pocket, your friends a text away, a camera for everything. It just comes with a few things worth knowing first.<br><br>
+      Have a go at these. Some are about staying safe, some are just about being a good, kind, sensible phone owner. There's no pass or fail — every answer teaches you something. Ready?</p>
+      <button class="btn" onclick="start()">Let's go →</button>
+    </div>`;
+  toTop();
+}
+function start(){ idx=0; firstTry=0; render(); }
+
+function render(){
+  answered=false;
+  const q=QUESTIONS[idx];
+  setBar(idx/QUESTIONS.length);
+  const opts=q.options.map((o,i)=>`<button class="opt" id="o${i}" onclick="choose(${i})">${o.t}<span class="tick" id="t${i}"></span></button>`).join('');
+  screen.innerHTML=`
+    <div class="lvl">Question ${idx+1} of ${QUESTIONS.length}</div>
+    <span class="tag ${q.pos?'pos':''}">${q.emoji} ${q.tag}</span>
+    <h2>${q.q}</h2>
+    <div>${opts}</div>
+    <div class="fb" id="fb"></div>
+    <button class="btn hide" id="next" onclick="next()">Next →</button>`;
+  toTop();
+}
+function choose(i){
+  if(answered) return; answered=true;
+  const q=QUESTIONS[idx], chosen=q.options[i];
+  if(chosen.correct) firstTry++;
+  q.options.forEach((o,j)=>{
+    const b=document.getElementById('o'+j); b.disabled=true;
+    if(o.correct){ b.classList.add('correct'); document.getElementById('t'+j).textContent='✓'; }
+    else if(j===i){ b.classList.add('wrong'); document.getElementById('t'+j).textContent='✕'; }
+  });
+  const fb=document.getElementById('fb');
+  fb.classList.add('show', chosen.correct?'good':'learn');
+  fb.innerHTML=(chosen.correct?"<b>Nice one! ⭐</b> ":"<b>Good thinking — here's the idea 👇</b> ")+q.why;
+  document.getElementById('next').classList.remove('hide');
+  const nb=document.getElementById('next');
+  nb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function next(){ idx++; idx>=QUESTIONS.length ? finish() : render(); }
+
+function finish(){
+  setBar(1);
+  const today=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const badges=["➕","🗺️","💬","🍽️","👋","🏫","🎟️","📷","🐴","💛","🟩","🛡️","🫶","🌊","📚","🌟"];
+  screen.innerHTML=`
+    <div class="cert">
+      <div class="seal">🏅</div>
+      <div class="kick">Licence Earned</div>
+      <h1 style="font-size:22px">Phone Licence</h1>
+      <p style="margin:4px 0 0">This certifies that</p>
+      <div class="name">${KID}</div>
+      <p style="margin:0">knows how to use her phone safely, kindly and well.</p>
+      <div class="badges">${badges.map(b=>`<div class="badge">${b}</div>`).join('')}</div>
+      <div class="rule">🫶 If anything ever upsets or scares me, I put the phone down and tell Mummy or Dad — and I'm never in trouble.</div>
+      <div class="rule">🎟️ I never send money or passwords to messages, however exciting or urgent they seem.</div>
+      <div class="rule">💬 I'm warm and kind in my texts, and I don't expect instant replies.</div>
+      <div class="rule">📷 I ask before sharing photos of friends, and keep private things private.</div>
+      <div class="rule">🍽️ Phones go away at meals and bedtime — the people I'm with come first.</div>
+      <div class="note"><b>And the big secret:</b> life before phones was amazing — and yours still is. The best bits of your life happen off this screen: the ponies, the baking, Polzeath, the Hornets, a good book, and everyone you love. This little phone is just here to help. Put it down loads. 🌟</div>
+      <div class="sign"><div>${KID} · ${today}</div><div>Parent</div></div>
+    </div>
+    <p class="center muted" style="margin-top:14px">You got ${firstTry}/${QUESTIONS.length} first try — brilliant.</p>
+    <button class="btn noprint" onclick="window.print()">🖨️ Print my licence</button>
+    <button class="btn ghost noprint" onclick="intro()">↺ Take it again</button>`;
+  toTop();
+}
+intro();
+</script>
+</body>
+</html>
